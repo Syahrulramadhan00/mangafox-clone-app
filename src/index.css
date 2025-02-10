@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+
+@theme {  
+     --color-midnight: #111111;
+     --color-light: #F9F9F9;
+     --font-sans: "Inter", sans-serif;
+     --font-serif: "Lora", serif;
+     --font-mono: "Lato", sans-serif;
+     --font-mona: "Mona Sans", sans-serif;
+     
+    }
