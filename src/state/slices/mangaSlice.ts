@@ -7,18 +7,31 @@ interface ImgRecomendation {
 }
 
 interface RecomendationState {
-    images: ImgRecomendation[];
-    loading: boolean;
-    error: string | null;
+    manga: {
+        images: ImgRecomendation[];
+        loading: boolean;
+        error: string | null;
+    };
+    anime: {
+        images: ImgRecomendation[];
+        loading: boolean;
+        error: string | null;
+    };
 }
 
 const initialState: RecomendationState = {
-    images: [],
-    loading: false,
-    error: null
+    manga: {
+        images: [],
+        loading: false,
+        error: null,
+    },
+    anime: {
+        images: [],
+        loading: false,
+        error: null,
+    },
 };
 
-// Fetch manga recommendations
 export const fetchMangaRecomendations = createAsyncThunk(
     "recomendations/fetchMangaRecomendations",
     async (_, { rejectWithValue }) => {
@@ -29,6 +42,27 @@ export const fetchMangaRecomendations = createAsyncThunk(
                 throw new Error("Failed to fetch recommendations");
             }
 
+            const data = response.data.data.map((item: any) => ({
+                title: item.entry.title,
+                src: item.entry.images.jpg.image_url,
+            }));
+
+            return data;
+        } catch (error: any) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
+export const fetchAnimeRecomendations = createAsyncThunk(
+    "recomendations/fetchAnimeRecomendations",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get("anime/1/recommendations");
+
+            if (response.status !== 200) {
+                throw new Error("Failed to fetch recommendations");
+            }
 
             const data = response.data.data.map((item: any) => ({
                 title: item.entry.title,
@@ -49,17 +83,32 @@ export const recomendationSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // Manga
             .addCase(fetchMangaRecomendations.pending, (state) => {
-                state.loading = true;
-                state.error = null;
+                state.manga.loading = true; 
+                state.manga.error = null;
             })
             .addCase(fetchMangaRecomendations.fulfilled, (state, action) => {
-                state.loading = false;
-                state.images = action.payload;
+                state.manga.loading = false;
+                state.manga.images = action.payload;
             })
             .addCase(fetchMangaRecomendations.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload as string;
+                state.manga.loading = false;
+                state.manga.error = action.payload as string;
+            })
+
+            // Anime
+            .addCase(fetchAnimeRecomendations.pending, (state) => {
+                state.anime.loading = true;
+                state.anime.error = null;
+            })
+            .addCase(fetchAnimeRecomendations.fulfilled, (state, action) => {
+                state.anime.loading = false;
+                state.anime.images = action.payload;
+            })
+            .addCase(fetchAnimeRecomendations.rejected, (state, action) => {
+                state.anime.loading = false;
+                state.anime.error = action.payload as string;
             });
     },
 });
